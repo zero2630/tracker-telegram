@@ -4,6 +4,7 @@ from fastapi import FastAPI
 import asyncio
 
 from conf import TOKEN
+import database
 
 app = FastAPI()
 BOT_TOKEN = TOKEN
@@ -25,7 +26,13 @@ async def poll_updates():
         for update in updates.get("result", []):
             chat_id = update["message"]["chat"]["id"]
             message_text = update["message"]["text"]
-            await send_message(chat_id, f"Вы написали: {message_text}")
+            username = update["message"]["chat"]["username"]
+            if message_text == "/start":
+                if not database.check_user(username):
+                    database.set_confirmed_tg(username, chat_id)
+                    await send_message(chat_id, f"Верификация прошла успешно, {username}")
+                else:
+                    await send_message(chat_id, f"Вы не зарегистрированы в сервисе")
             offset = update["update_id"] + 1
         await asyncio.sleep(1)  # Задержка перед следующим запросом
 

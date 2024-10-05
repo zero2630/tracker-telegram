@@ -11,15 +11,16 @@ params = {
 
 conn = psycopg2.connect(**params)
 conn.autocommit = True
-
 cur = conn.cursor()
 
 def check_user(username):
     query = "SELECT id FROM \"user\" WHERE telegram=%s;"
     cur.execute(query, (username,))
-    a =  cur.fetchall()
-    print(a)
+    cur.fetchall()
 
 def set_confirmed_tg(username, tg_chat_id):
-    query = "UPDATE \"user\" SET tg_chat_id='%d', tg_confirmed='t' WHERE telegram=%s;"
-    cur.execute(query, (tg_chat_id, username))
+    try:
+        query = "UPDATE \"user\" SET tg_chat_id='%s', tg_confirmed='t' WHERE telegram=%s;"
+        cur.execute(query, (tg_chat_id, username))
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
