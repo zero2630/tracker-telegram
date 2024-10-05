@@ -18,6 +18,12 @@ def check_user(username):
     cur.execute(query, (username,))
     cur.fetchall()
 
+def check_user_confirmed(user_id):
+    query = "SELECT tg_confirmed FROM \"user\" WHERE tg_chat_id=%s;"
+    cur.execute(query, (user_id,))
+    a = cur.fetchall()[0][0]
+    return a
+
 def set_confirmed_tg(username, tg_chat_id):
     try:
         query = "UPDATE \"user\" SET tg_chat_id='%s', tg_confirmed='t' WHERE telegram=%s;"

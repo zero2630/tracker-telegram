@@ -1,10 +1,17 @@
 import os
 import httpx
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 import asyncio
+from pydantic import BaseModel
 
 from conf import TOKEN
 import database
+from database import check_user_confirmed
+
+
+class SendMessage(BaseModel):
+    ids: list[int]
+    message: str
 
 app = FastAPI()
 BOT_TOKEN = TOKEN
@@ -39,6 +46,26 @@ async def poll_updates():
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(poll_updates())
+
+@app.post("/send_message")
+async def get_message(data: SendMessage):
+    non_verif = []
+    for el in data.ids:
+        if check_user_confirmed(str(el)):
+            await send_message(el, data.message)
+        else:
+            non_verif.append(el)
+    if non_verif:
+        return {
+            "message": f"Пользователям с id {non_verif} сообщения отправлены не были, т.к. они не подтвердили telegram аккаунты",
+            "status_code": 400
+        }
+    else:
+        return {
+            "message": "Сообщения было успешно отправлено",
+            "status_code": 200
+        }
+
 
 if __name__ == "__main__":
     import uvicorn
