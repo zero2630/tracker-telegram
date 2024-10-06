@@ -1,7 +1,9 @@
+import asyncio
 import os
+import datetime
+
 import httpx
 from fastapi import FastAPI, Request
-import asyncio
 from pydantic import BaseModel
 
 from conf import TOKEN
@@ -16,6 +18,25 @@ class SendMessage(BaseModel):
 app = FastAPI()
 BOT_TOKEN = TOKEN
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
+
+async def check_deadlines(s, h):
+    while True:
+        if datetime.datetime.now().hour == h:
+            today = datetime.date.today()
+            tomorrow = today + datetime.timedelta(days=1)
+            three_days = today + datetime.timedelta(days=3)
+
+            deadlines = database.check_deadlines(today)
+            deadlines1 = database.check_deadlines(tomorrow)
+            deadlines3 = database.check_deadlines(three_days)
+
+            for el in deadlines:
+                await send_message(el[0], f"У тебя горит дедлайн по задаче \"{el[1]}\"")
+            for el in deadlines1:
+                await send_message(el[0], f"Завтра дедлайн по задаче \"{el[1]}\"")
+            for el in deadlines3:
+                await send_message(el[0], f"Через три дня дедлайн по задаче \"{el[1]}\"")
+            await asyncio.sleep(s)
 
 async def get_updates(offset=None):
     async with httpx.AsyncClient() as client:
@@ -46,6 +67,7 @@ async def poll_updates():
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(poll_updates())
+    asyncio.create_task(check_deadlines(1800, 12))
 
 @app.post("/send_message")
 async def get_message(data: SendMessage):

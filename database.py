@@ -30,3 +30,18 @@ def set_confirmed_tg(username, tg_chat_id):
         cur.execute(query, (tg_chat_id, username))
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+
+def check_deadlines(date):
+    try:
+        query = """SELECT u.tg_chat_id, t.name
+FROM \"user\" as u
+INNER JOIN task_assign as ta
+    ON u.id = ta.user_id
+INNER JOIN task as t
+    ON t.id = ta.task_id
+WHERE t.due_date = %s ;"""
+        cur.execute(query, (date.strftime("%d.%m.%Y"),))
+        return cur.fetchall()
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
