@@ -74,7 +74,8 @@ async def get_message(data: SendMessage):
     non_verif = []
     for el in data.ids:
         if check_user_confirmed(str(el)):
-            await send_message(el, data.message)
+            tg_id = database.get_tg_by_id(el)[0][0]
+            await send_message(tg_id, data.message)
         else:
             non_verif.append(el)
     if non_verif:

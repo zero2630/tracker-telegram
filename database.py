@@ -13,14 +13,19 @@ conn = psycopg2.connect(**params)
 conn.autocommit = True
 cur = conn.cursor()
 
+def get_tg_by_id(db_user_id):
+    query = "SELECT tg_chat_id FROM \"user\" WHERE id=%s;"
+    cur.execute(query, (db_user_id,))
+    return cur.fetchall()
+
 def check_user(username):
     query = "SELECT id FROM \"user\" WHERE telegram=%s;"
     cur.execute(query, (username,))
-    cur.fetchall()
+    return cur.fetchall()
 
-def check_user_confirmed(user_id):
-    query = "SELECT tg_confirmed FROM \"user\" WHERE tg_chat_id=%s;"
-    cur.execute(query, (user_id,))
+def check_user_confirmed(db_user_id):
+    query = "SELECT tg_confirmed FROM \"user\" WHERE id=%s;"
+    cur.execute(query, (db_user_id,))
     a = cur.fetchall()[0][0]
     return a
 
