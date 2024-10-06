@@ -36,7 +36,7 @@ async def check_deadlines(s, h):
                 await send_message(el[0], f"Завтра дедлайн по задаче \"{el[1]}\"")
             for el in deadlines3:
                 await send_message(el[0], f"Через три дня дедлайн по задаче \"{el[1]}\"")
-            await asyncio.sleep(s)
+        await asyncio.sleep(s)
 
 async def get_updates(offset=None):
     async with httpx.AsyncClient() as client:
@@ -88,7 +88,6 @@ async def get_message(data: SendMessage):
             "message": "Сообщения было успешно отправлено",
             "status_code": 200
         }
-
 
 if __name__ == "__main__":
     import uvicorn
